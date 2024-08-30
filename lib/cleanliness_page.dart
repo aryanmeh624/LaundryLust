@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'global.dart' as globals;
 import 'home.dart';
 
 class CleanlinessPage extends StatefulWidget {
@@ -9,7 +8,7 @@ class CleanlinessPage extends StatefulWidget {
 }
 
 class _CleanlinessPageState extends State<CleanlinessPage> {
-  double _currentSliderValue = globals.cleanlinessLevel.toDouble();
+  double _currentSliderValue = 1.0;
 
   // List of descriptions for each slider value
   final List<String> cleanlinessDescriptions = [
@@ -24,6 +23,24 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
     "Almost Spotless", // 9
     "Spotless",    // 10
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCleanlinessLevel();
+  }
+
+  Future<void> _loadCleanlinessLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _currentSliderValue = (prefs.getInt('cleanlinessLevel') ?? 1).toDouble();
+    });
+  }
+
+  Future<void> _saveCleanlinessLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('cleanlinessLevel', _currentSliderValue.round());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,9 +93,7 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
             SizedBox(height: 40),
             GestureDetector(
               onTap: () async {
-                globals.cleanlinessLevel = _currentSliderValue.round();
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('hasSetCleanliness', true);
+                await _saveCleanlinessLevel();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => Home()),
