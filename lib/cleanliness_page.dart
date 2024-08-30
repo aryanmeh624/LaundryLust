@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
-
+//this is random
 class CleanlinessPage extends StatefulWidget {
   @override
   _CleanlinessPageState createState() => _CleanlinessPageState();
