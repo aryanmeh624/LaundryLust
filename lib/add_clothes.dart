@@ -22,7 +22,7 @@ class _AddClothesState extends State<AddClothes> {
       });
     }
   }
-
+//
   @override
   void dispose() {
     _nameController.dispose();
