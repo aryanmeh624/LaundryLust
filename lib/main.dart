@@ -14,7 +14,7 @@ void main() async {
   if (!hasSeenIntro) {
     defaultHome = IntroPage();
   } else if (!hasSetCleanliness) {
-    defaultHome = Home();
+    defaultHome = IntroPage();
   } else {
     defaultHome = Home();
   }

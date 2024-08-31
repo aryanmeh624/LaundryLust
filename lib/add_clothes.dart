@@ -22,7 +22,7 @@ class _AddClothesState extends State<AddClothes> {
       });
     }
   }
-//
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -32,63 +32,103 @@ class _AddClothesState extends State<AddClothes> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightBlue[50], // Background color consistent with previous pages
       appBar: AppBar(
-        title: Text('Add Clothes'),
+        title: Text(
+          'Add Clothes',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.indigo,
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Center(
-                  child: _image == null
-                      ? Text('No image selected.')
-                      : SizedBox(
-                    width: 150, // Set the desired width
-                    height: 150, // Set the desired height
-                    child: Image.file(
-                      _image!,
-                      fit: BoxFit.cover, // Ensure the image fits within the box
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // Display the image in a circular container
+              Center(
+                child: GestureDetector(
+                  onTap: _openCamera,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.indigo.withOpacity(0.1),
+                      image: _image != null
+                          ? DecorationImage(
+                        image: FileImage(_image!),
+                        fit: BoxFit.cover,
+                      )
+                          : null,
                     ),
-                  ), // Display the image in a smaller size
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _openCamera, // Open the camera when button is pressed
-                  child: Text('Take a Picture'),
-                ),
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Clothing Name',
-                    border: OutlineInputBorder(),
+                    child: _image == null
+                        ? Icon(
+                      Icons.camera_alt,
+                      color: Colors.indigo,
+                      size: 50,
+                    )
+                        : null,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
-                    }
-                    return null;
-                  },
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Handle the submission, like saving the data to a database
-                      print('Clothing Name: ${_nameController.text}');
-                      if (_image != null) {
-                        print('Image Path: ${_image!.path}');
-                      }
-                    }
-                  },
-                  child: Text('Save'),
+              ),
+              SizedBox(height: 30),
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Clothing Name',
+                  labelStyle: TextStyle(color: Colors.indigo),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.indigo),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.indigo),
+                  ),
                 ),
-              ],
-            ),
+                cursorColor: Colors.indigo,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a name';
+                  }
+                  return null;
+                },
+              ),
+              Spacer(),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    // Handle the submission, like saving the data to a database
+                    print('Clothing Name: ${_nameController.text}');
+                    if (_image != null) {
+                      print('Image Path: ${_image!.path}');
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: Colors.indigo, // Use backgroundColor instead of primary
+                ),
+                child: Text(
+                  'Save',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
