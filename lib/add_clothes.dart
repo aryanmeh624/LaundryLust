@@ -49,7 +49,7 @@ class _AddClothesState extends State<AddClothes> {
         name: _nameController.text,
         lastWorn: 0, // Default value for lastWorn
         dirty: 0, // Default value for dirty
-        pic: 69420,
+        pic: imageBytes,
       );
 
       // Insert the new clothing item into the database
