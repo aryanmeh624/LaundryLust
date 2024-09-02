@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:typed_data';
+import 'cloth_data/change_clothes.dart'; // Import the file where insertlaundry is defined
+import 'cloth_data/main_DB.dart'; // Import your laundryData model
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
 
 class AddClothes extends StatefulWidget {
   @override
@@ -13,13 +21,44 @@ class _AddClothesState extends State<AddClothes> {
   File? _image; // To store the image file
 
   // Function to open the camera and capture an image
-  Future<void> _openCamera() async {
+    Future<void> _openCamera() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      img.Image? image = img.decodeImage(bytes);
+      img.Image resizedImage = img.copyResize(image!, width: 100, height: 100);
+      final resizedBytes = Uint8List.fromList(img.encodePng(resizedImage));
       setState(() {
         _image = File(pickedFile.path);
+        // Save or use the resized image as needed
       });
+    }
+  }
+
+
+  // Function to save the clothing item
+  Future<void> _saveClothing() async {
+    if (_formKey.currentState!.validate() && _image != null) {
+      // Convert the image to Uint8List
+      Uint8List imageBytes = await _image!.readAsBytes();
+
+      // Create a new laundryData object
+      laundryData newClothing = laundryData(
+        id: 0, // Example id
+        name: _nameController.text,
+        lastWorn: 0, // Default value for lastWorn
+        dirty: 0, // Default value for dirty
+        pic: imageBytes,
+      );
+
+      // Insert the new clothing item into the database
+      await insertlaundry(newClothing);
+
+      // Navigate back to the Home page
+      print("---------------------------------------------------${newClothing.name} ${newClothing.id} ${newClothing.dirty} ${newClothing.pic} ${newClothing.lastWorn} -----------------------------------------------------");
+
+      Navigator.pop(context);
     }
   }
 
@@ -32,8 +71,8 @@ class _AddClothesState extends State<AddClothes> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50], // Background color consistent with previous pages
-       appBar: AppBar(
+      backgroundColor: Colors.lightBlue[50],
+      appBar: AppBar(
         title: Text(
           'Add Clothes',
           style: TextStyle(
@@ -53,7 +92,6 @@ class _AddClothesState extends State<AddClothes> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // Display the image in a circular container
               Center(
                 child: GestureDetector(
                   onTap: _openCamera,
@@ -65,11 +103,7 @@ class _AddClothesState extends State<AddClothes> {
                       color: Colors.indigo.withOpacity(0.1),
                       image: _image != null
                           ? DecorationImage(
-                        image: ResizeImage(FileImage(_image!),
-                          width:100,
-                          height: 100,
-                          allowUpscaling: true,
-                        ),
+                        image: FileImage(_image!),
                         fit: BoxFit.cover,
                       )
                           : null,
@@ -107,21 +141,13 @@ class _AddClothesState extends State<AddClothes> {
               ),
               Spacer(),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Handle the submission, like saving the data to a database
-                    print('Clothing Name: ${_nameController.text}');
-                    if (_image != null) {
-                      print('Image Path: ${_image!.path}');
-                    }
-                  }
-                },
+                onPressed: _saveClothing, // Call _saveClothing on button press
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: Colors.indigo, // Use backgroundColor instead of primary
+                  backgroundColor: Colors.indigo,
                 ),
                 child: Text(
                   'Save',

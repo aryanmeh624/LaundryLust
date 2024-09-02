@@ -6,7 +6,7 @@ import 'package:laundry_lust/cloth_data/main_DB.dart';
 
 Future<List<laundryData>> laundryGet() async{
   final db = await DatabaseHelper().database;
-  final List<Map<String, dynamic>> laundryMaps = await db.query('laundryGet');
+  final List<Map<String, dynamic>> laundryMaps = await db.query('laundry');
   return[
     for(final{
       'id': id as int,
