@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class laundryData{
   final int id;
-  final int pic;
+  final Uint8List pic;
   final int lastWorn;
   final int dirty;
   final String name;
