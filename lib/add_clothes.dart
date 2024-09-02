@@ -33,7 +33,7 @@ class _AddClothesState extends State<AddClothes> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue[50], // Background color consistent with previous pages
-      appBar: AppBar(
+       appBar: AppBar(
         title: Text(
           'Add Clothes',
           style: TextStyle(
@@ -65,7 +65,11 @@ class _AddClothesState extends State<AddClothes> {
                       color: Colors.indigo.withOpacity(0.1),
                       image: _image != null
                           ? DecorationImage(
-                        image: FileImage(_image!),
+                        image: ResizeImage(FileImage(_image!),
+                          width:100,
+                          height: 100,
+                          allowUpscaling: true,
+                        ),
                         fit: BoxFit.cover,
                       )
                           : null,

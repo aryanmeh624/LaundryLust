@@ -19,7 +19,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel') ?? 0;
     });
   }
-
   @override
   void initState() {
     super.initState();
