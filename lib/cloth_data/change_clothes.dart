@@ -18,5 +18,5 @@ Future<void> updatelaundry(laundryData laundry) async{
     where: 'id = ?',
     whereArgs: [laundry.id],
   );
-}
+}//bruh
 
