@@ -8,15 +8,16 @@ import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final database = openDatabase(
+
+  // Initialize the database and create the table if it doesn't exist
+  final database = await openDatabase(
     join(await getDatabasesPath(), 'laundry_database.db'),
-    onCreate: (db, version){
-      return db.execute(
-        'CREATE TABLE laundryData(id INTEGER PRIMARY KEY, name TEXT, age INTEGER)'
-      );
+    onCreate: (db, version) async {
+      await db.execute("CREATE TABLE laundry(id INTEGER PRIMARY KEY,pic BLOB, lastWorn INTEGER,dirty INTEGER,name TEXT)");
     },
     version: 1,
   );
+
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
   bool hasSetCleanliness = prefs.getBool('hasSetCleanliness') ?? false;
@@ -27,7 +28,6 @@ void main() async {
   } else if (!hasSetCleanliness) {
     defaultHome = IntroPage();
   } else {
-
     defaultHome = Home();
   }
 

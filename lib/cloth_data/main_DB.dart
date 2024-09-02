@@ -18,13 +18,13 @@ class laundryData{
     required this.dirty,
     required this.name,
   });
-  Map<String, dynamic> toMap(){
-    return{
+  Map<String, dynamic> toMap() {
+    return {
       'id': id,
-      'pic' : pic,
-      'lastWorn' : lastWorn,
-      'dirty' : dirty,
-      'name' : name,
+      'pic': pic,  // This should match the database column name
+      'lastWorn': lastWorn,
+      'dirty': dirty,
+      'name': name,
     };
   }
   @override

@@ -29,9 +29,7 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE laundry(id INTEGER PRIMARY KEY, name TEXT)',
-        );
+        return db.execute("CREATE TABLE laundry(id INTEGER PRIMARY KEY,pic BLOB, lastWorn INTEGER,dirty INTEGER,name TEXT)");
       },
     );
   }
