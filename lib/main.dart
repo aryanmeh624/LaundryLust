@@ -27,6 +27,7 @@ void main() async {
   } else if (!hasSetCleanliness) {
     defaultHome = IntroPage();
   } else {
+
     defaultHome = Home();
   }
 
