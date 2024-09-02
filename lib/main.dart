@@ -13,7 +13,7 @@ void main() async {
   final database = await openDatabase(
     join(await getDatabasesPath(), 'laundry_database.db'),
     onCreate: (db, version) async {
-      await db.execute("CREATE TABLE laundry(id INTEGER PRIMARY KEY,pic BLOB, lastWorn INTEGER,dirty INTEGER,name TEXT)");
+      await db.execute("CREATE TABLE laundry(id INTEGER PRIMARY KEY,pic INTEGER, lastWorn INTEGER,dirty INTEGER,name TEXT)");
     },
     version: 1,
   );

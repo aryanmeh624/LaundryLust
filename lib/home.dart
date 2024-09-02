@@ -99,9 +99,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               title: Text(flashcard.name),
               subtitle: Text(
                 'Last Worn: ${flashcard.lastWorn} days ago\n'
-                    'Dirty Level: ${flashcard.dirty}',
+                    'Dirty Level: ${flashcard.dirty}'
+                'pic: ${flashcard.pic}',
               ),
-              leading: Image.memory(flashcard.pic), // Display the image
             ),
           );
         },

@@ -10,7 +10,7 @@ Future<List<laundryData>> laundryGet() async{
   return[
     for(final{
       'id': id as int,
-      'pic': pic as Uint8List,
+      'pic': pic as int,
       'lastWorn':  lastWorn as int,
       'dirty': dirty as int,
       'name': name as String

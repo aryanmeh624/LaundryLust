@@ -4,6 +4,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'cloth_data/change_clothes.dart'; // Import the file where insertlaundry is defined
 import 'cloth_data/main_DB.dart'; // Import your laundryData model
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
 
 class AddClothes extends StatefulWidget {
   @override
@@ -16,15 +21,21 @@ class _AddClothesState extends State<AddClothes> {
   File? _image; // To store the image file
 
   // Function to open the camera and capture an image
-  Future<void> _openCamera() async {
+    Future<void> _openCamera() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      img.Image? image = img.decodeImage(bytes);
+      img.Image resizedImage = img.copyResize(image!, width: 100, height: 100);
+      final resizedBytes = Uint8List.fromList(img.encodePng(resizedImage));
       setState(() {
         _image = File(pickedFile.path);
+        // Save or use the resized image as needed
       });
     }
   }
+
 
   // Function to save the clothing item
   Future<void> _saveClothing() async {
@@ -34,18 +45,18 @@ class _AddClothesState extends State<AddClothes> {
 
       // Create a new laundryData object
       laundryData newClothing = laundryData(
-        id: DateTime.now().millisecondsSinceEpoch, // Example id
+        id: 0, // Example id
         name: _nameController.text,
         lastWorn: 0, // Default value for lastWorn
         dirty: 0, // Default value for dirty
-        pic: imageBytes,
+        pic: 69420,
       );
 
       // Insert the new clothing item into the database
       await insertlaundry(newClothing);
 
       // Navigate back to the Home page
-      print("---------------------------------------------------${newClothing.name} -----------------------------------------------------");
+      print("---------------------------------------------------${newClothing.name} ${newClothing.id} ${newClothing.dirty} ${newClothing.pic} ${newClothing.lastWorn} -----------------------------------------------------");
 
       Navigator.pop(context);
     }
