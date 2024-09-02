@@ -10,11 +10,11 @@ Future<List<laundryData>> laundryGet() async{
   return[
     for(final{
       'id': id as int,
-      'pic': pic as Uint8List,
+      'pic': pic as String,
       'lastWorn':  lastWorn as int,
       'dirty': dirty as int,
       'name': name as String
     } in laundryMaps)
-      laundryData(id: id,pic: pic, lastWorn: lastWorn, dirty: dirty, name: name),
+      laundryData(id: id, pic: pic, lastWorn: lastWorn, dirty: dirty, name: name),
       ];
 }

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cleanliness_page.dart';
@@ -6,8 +5,11 @@ import 'cloth_data/get_clothes.dart';
 import 'global.dart' as globals;
 import 'add_clothes.dart';
 import 'flashcard.dart'; // Import flashcard.dart
+import 'dart:io';
+  // import 'dart:html';
 import 'cloth_data/main_DB.dart' as pog; // Import your main DB class
 import 'cloth_data/main_DB.dart';
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -94,13 +96,30 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         itemCount: _flashcards.length,
         itemBuilder: (context, index) {
           var flashcard = _flashcards[index];
+          int currentTimestamp = DateTime.now().minute;
+          int differenceInSeconds = currentTimestamp - (flashcard.lastWorn);
+          int differenceInHours = differenceInSeconds~/60;
+          // int hoursSinceLastWorn = DateTime.now()
+          //     .difference(flashcard.lastWorn as DateTime).inHours;
           return Card(
             child: ListTile(
+              leading: flashcard.pic != null && flashcard.pic.isNotEmpty
+                  ? Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0), // Rounded corners
+                  image: DecorationImage(
+                    image: FileImage(File(flashcard.pic)),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+                  : Icon(Icons.image_not_supported), // A placeholder icon if no image
               title: Text(flashcard.name),
               subtitle: Text(
-                'Last Worn: ${flashcard.lastWorn} days ago\n'
-                    'Dirty Level: ${flashcard.dirty}'
-                'pic: ${flashcard.pic}',
+                'Last Worn: $differenceInHours hours ago\n'
+                    'Dirty Level: ${flashcard.dirty}',
               ),
             ),
           );
