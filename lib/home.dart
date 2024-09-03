@@ -96,9 +96,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         itemCount: _flashcards.length,
         itemBuilder: (context, index) {
           var flashcard = _flashcards[index];
+          DateTime lastWornTime = DateTime.fromMillisecondsSinceEpoch(flashcard.lastWorn);
+          int hoursSinceLastWorn = DateTime.now().difference(lastWornTime).inMinutes;
           int currentTimestamp = DateTime.now().minute;
-          int differenceInSeconds = currentTimestamp - (flashcard.lastWorn);
-          int differenceInHours = differenceInSeconds~/60;
+          int differenceInMinutes = currentTimestamp - (flashcard.lastWorn);
+          int differenceInHours = differenceInMinutes;
           // int hoursSinceLastWorn = DateTime.now()
           //     .difference(flashcard.lastWorn as DateTime).inHours;
           return Card(
@@ -118,7 +120,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   : Icon(Icons.image_not_supported), // A placeholder icon if no image
               title: Text(flashcard.name),
               subtitle: Text(
-                'Last Worn: $differenceInHours hours ago\n'
+                'Last Worn: $hoursSinceLastWorn min ago\n'
                     'Dirty Level: ${flashcard.dirty}',
               ),
             ),
