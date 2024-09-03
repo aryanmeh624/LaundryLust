@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 
 class laundryData{
   final int id;
-  final Uint8List pic;
+  final String pic;
   final int lastWorn;
   final int dirty;
   final String name;
