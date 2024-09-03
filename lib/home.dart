@@ -6,7 +6,6 @@ import 'global.dart' as globals;
 import 'add_clothes.dart';
 import 'flashcard.dart'; // Import flashcard.dart
 import 'dart:io';
-  // import 'dart:html';
 import 'cloth_data/main_DB.dart' as pog; // Import your main DB class
 import 'cloth_data/main_DB.dart';
 
@@ -30,27 +29,38 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Future<void> _loadData() async {
     try {
-      var laundryDataList = await laundryGet(); // Get the list of dictionaries
+      // Fetch the list of laundry data from the database
+      var laundryDataList = await laundryGet();
+
+      // Debugging: Print the fetched list to ensure it contains all rows
+      print('Fetched laundry data: $laundryDataList');
+
+      // Clear the current flashcards list before repopulating it
       setState(() {
-        _flashcards = laundryDataList.map((data) {
-          return pog.laundryData(
+        _flashcards.clear(); // Clear the list to avoid duplicates
+        for (var data in laundryDataList) {
+          _flashcards.add(pog.laundryData(
             name: data.name,
             lastWorn: data.lastWorn,
             dirty: data.dirty,
             id: data.id,
             pic: data.pic,
-          );
-        }).toList();
-        _isLoading = false;
+          ));
+        }
+
+        // Debugging: Print the flashcards list to ensure all rows are added
+        print('Mapped flashcards: $_flashcards');
+
+        _isLoading = false; // Set loading to false once data is loaded
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      // Handle the error as needed
+      // Optionally, handle errors here
+      print('Error loading data: $e');
     }
   }
-
   @override
   void initState() {
     super.initState();
@@ -74,6 +84,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -92,76 +103,52 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-        itemCount: _flashcards.length,
-        itemBuilder: (context, index) {
-          var flashcard = _flashcards[index];
-          int currentTimestamp = DateTime.now().minute;
-          int differenceInSeconds = currentTimestamp - (flashcard.lastWorn);
-          int differenceInHours = differenceInSeconds~/60;
-          // int hoursSinceLastWorn = DateTime.now()
-          //     .difference(flashcard.lastWorn as DateTime).inHours;
-          return Card(
-            child: ListTile(
-              leading: flashcard.pic != null && flashcard.pic.isNotEmpty
-                  ? Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0), // Rounded corners
-                  image: DecorationImage(
-                    image: FileImage(File(flashcard.pic)),
-                    fit: BoxFit.cover,
+          : ListView(
+        children: [
+          for (var flashcard in _flashcards)
+            InkWell(
+              onTap: () {
+                print('Tapped on ${flashcard.name}');
+              },
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    leading: flashcard.pic != null && flashcard.pic.isNotEmpty
+                        ? Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        image: DecorationImage(
+                          image: FileImage(File(flashcard.pic)),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    )
+                        : Icon(Icons.image_not_supported),
+                    title: Text(flashcard.name),
+                    subtitle: Text(
+                      'Last Worn: ${flashcard.lastWorn} minutes ago\n'
+                          'Dirty: ${flashcard.dirty}',
+                    ),
                   ),
                 ),
-              )
-                  : Icon(Icons.image_not_supported), // A placeholder icon if no image
-              title: Text(flashcard.name),
-              subtitle: Text(
-                'Last Worn: $differenceInHours hours ago\n'
-                    'Dirty Level: ${flashcard.dirty}',
               ),
             ),
-          );
-        },
+        ],
       ),
-      floatingActionButton: _AnimatedFloatingActionButton(
-        animation: _animation,
+
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddClothes()),
           );
+          _loadData();
         },
+        child: Icon(Icons.add),
       ),
-    );
-  }
-}
-
-class _AnimatedFloatingActionButton extends StatelessWidget {
-  final Animation<double> animation;
-  final VoidCallback onPressed;
-
-  _AnimatedFloatingActionButton({
-    required this.animation,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: animation.value,
-          child: FloatingActionButton(
-            onPressed: onPressed,
-            backgroundColor: Colors.blue,
-            child: Icon(Icons.add),
-            tooltip: 'Add Clothes',
-          ),
-        );
-      },
     );
   }
 }

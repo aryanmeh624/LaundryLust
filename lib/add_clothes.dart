@@ -44,7 +44,7 @@ class _AddClothesState extends State<AddClothes> {
 
       // Create a new laundryData object
       laundryData newClothing = laundryData(
-        id: 0, // Example id
+        id: DateTime.now().microsecondsSinceEpoch, // Example id
         name: _nameController.text,
         lastWorn: DateTime.now().minute, // Default value for lastWorn
         dirty: 0, // Default value for dirty
