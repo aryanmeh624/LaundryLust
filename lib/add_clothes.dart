@@ -46,7 +46,7 @@ class _AddClothesState extends State<AddClothes> {
       laundryData newClothing = laundryData(
         id: 0, // Example id
         name: _nameController.text,
-        lastWorn: DateTime.now().minute, // Default value for lastWorn
+        lastWorn: DateTime.now().millisecondsSinceEpoch, // Default value for lastWorn
         dirty: 0, // Default value for dirty
         pic: _image!.path,
       );
