@@ -8,10 +8,10 @@ class laundryData{
   final int id;
   final String pic;
   final int lastWorn;
-  final int dirty;
+  int dirty;
   final String name;
 
-  const laundryData({
+  laundryData({
     required this.id,
     required this.pic,
     required this.lastWorn,

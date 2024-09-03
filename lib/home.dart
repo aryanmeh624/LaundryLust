@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laundry_lust/levelSelectionPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cleanliness_page.dart';
 import 'cloth_data/get_clothes.dart';
@@ -82,8 +83,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     _controller.dispose();
     super.dispose();
   }
-//hhj
-  @override
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,6 +109,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             InkWell(
               onTap: () {
                 print('Tapped on ${flashcard.name}');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LevelSelectionPage(laundryItem: flashcard,))
+                );
               },
               child: Card(
                 child: Padding(
