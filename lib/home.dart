@@ -10,7 +10,9 @@ import 'flashcard.dart';
 import 'dart:io';
 import 'cloth_data/main_DB.dart' as pog;
 import 'cloth_data/main_DB.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'global.dart';
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -43,7 +45,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       return '${difference.inDays} days ago';
     }
   }
-
   Future<void> _loadData() async {
     try {
       // Fetch the list of laundry data from the database
@@ -153,8 +154,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             : ListView.builder(
           itemCount: _flashcards.length,
           itemBuilder: (context, index) {
+            int data;
             return GestureDetector(
-              onTap: () {
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel')!.toInt();
                 if (_selectedIndices.isNotEmpty) {
                   _toggleSelection(index);
                 } else {
@@ -170,7 +174,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 _toggleSelection(index);
               },
               child: Card(
-                color: _selectedIndices.contains(index) ? Colors.blue.shade100 : null,
+
+
+                color: _selectedIndices.contains(index) ? Colors.blue.shade100 : _flashcards[index].dirty>3*(12-globals.cleanlinessLevel)?const Color(0xFFEF5350):null,
+                surfaceTintColor: _flashcards[index].dirty > 0 && _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
+                    ? Colors.yellow.shade700
+                    : (_flashcards[index].dirty >= (12 - globals.cleanlinessLevel)
+                    ? Colors.red.shade700
+                    : Colors.transparent),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
