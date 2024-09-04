@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:laundry_lust/levelSelectionPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+  late Timer _timer;
   late AnimationController _controller;
   late Animation<double> _animation;
   List<pog.laundryData> _flashcards = [];
@@ -26,6 +28,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     setState(() {
       globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel') ?? 0;
     });
+  }
+
+  // Calculate the time difference between the last worn time and the current time
+  String _calculateTimeDifference(int lastWorn) {
+    DateTime lastWornTime = DateTime.fromMillisecondsSinceEpoch(lastWorn);
+    Duration difference = DateTime.now().difference(lastWornTime);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} minutes ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hours ago';
+    } else {
+      return '${difference.inDays} days ago';
+    }
   }
 
   Future<void> _loadData() async {
@@ -62,11 +78,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       print('Error loading data: $e');
     }
   }
+
   @override
   void initState() {
     super.initState();
     _getCleanlinessLevel();
     _loadData(); // Load data when the widget is initialized
+
+    // Setup a periodic timer to refresh the flashcards every 60 seconds
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _loadData();  // Refresh the data
+      setState(() {});  // Rebuild the UI to reflect updated times
+    });
 
     // Initialize the animation controller and animation
     _controller = AnimationController(
@@ -80,6 +103,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _timer.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -110,15 +134,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               onTap: () {
                 print('Tapped on ${flashcard.name}');
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LevelSelectionPage(laundryItem: flashcard,))
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LevelSelectionPage(
+                          laundryItem: flashcard,
+                        )));
               },
               child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
-                    leading: flashcard.pic != null && flashcard.pic.isNotEmpty
+                    leading: flashcard.pic != null &&
+                        flashcard.pic.isNotEmpty
                         ? Container(
                       width: 50,
                       height: 50,
@@ -133,7 +160,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         : Icon(Icons.image_not_supported),
                     title: Text(flashcard.name),
                     subtitle: Text(
-                      'Last Worn: ${flashcard.lastWorn} minutes ago\n'
+                      'Last Worn: ${_calculateTimeDifference(flashcard.lastWorn)}\n'
                           'Dirty: ${flashcard.dirty}',
                     ),
                   ),
@@ -142,14 +169,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             ),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          // Wait for the result when navigating to the AddClothes page
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddClothes()),
           );
-          _loadData();
+
+          // Check if a new flashcard was added, and reload data
+          if (result == true) {
+            _loadData(); // Reload the flashcard data when a new one is added
+          }
         },
         child: Icon(Icons.add),
       ),

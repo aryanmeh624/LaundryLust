@@ -29,7 +29,7 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
     await updatelaundry(updatedLaundryItem);
 
     // Pop the page to return to the previous screen
-    Navigator.pop(context);
+    Navigator.pop(context,true);
   }
   //
   // Future<void> _pickImage() async {
