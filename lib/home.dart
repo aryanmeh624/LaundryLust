@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:laundry_lust/levelSelectionPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+  late Timer _timer;
   late AnimationController _controller;
   late Animation<double> _animation;
   List<pog.laundryData> _flashcards = [];
@@ -29,11 +31,28 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
+  // Calculate the time difference between the last worn time and the current time
+  String _calculateTimeDifference(int lastWorn) {
+    DateTime lastWornTime = DateTime.fromMillisecondsSinceEpoch(lastWorn);
+    Duration difference = DateTime.now().difference(lastWornTime);
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} minutes ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hours ago';
+    } else {
+      return '${difference.inDays} days ago';
+    }
+  }
+
   Future<void> _loadData() async {
     try {
+      // Fetch the list of laundry data from the database
       var laundryDataList = await laundryGet();
+      // Debugging: Print the fetched list to ensure it contains all rows
+      print('Fetched laundry data: $laundryDataList');
+      // Clear the current flashcards list before repopulating it
       setState(() {
-        _flashcards.clear();
+        _flashcards.clear();// Clear the list to avoid duplicates
         for (var data in laundryDataList) {
           _flashcards.add(pog.laundryData(
             name: data.name,
@@ -43,12 +62,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             pic: data.pic,
           ));
         }
-        _isLoading = false;
+        // Debugging: Print the flashcards list to ensure all rows are added
+        print('Mapped flashcards: $_flashcards');
+        _isLoading = false;// Set loading to false once data is loaded
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
+      // Optionally, handle errors here
       print('Error loading data: $e');
     }
   }
@@ -72,6 +94,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     _getCleanlinessLevel();
     _loadData();
 
+    // Setup a periodic timer to refresh the flashcards every 60 seconds
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _loadData();  // Refresh the data
+      setState(() {});  // Rebuild the UI to reflect updated times
+    });
+    // Initialize the animation controller and animation
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 2),
@@ -83,6 +112,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _timer.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -159,7 +189,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         : Icon(Icons.image_not_supported),
                     title: Text(_flashcards[index].name),
                     subtitle: Text(
-                      'Last Worn: ${_flashcards[index].lastWorn} minutes ago\n'
+                      'Last Worn: ${_calculateTimeDifference(_flashcards[index].lastWorn)}\n'
                           'Dirty: ${_flashcards[index].dirty}',
                     ),
                   ),
@@ -193,11 +223,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         child: Icon(Icons.more_vert),
       )
           : FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async{
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddClothes()),
-          ).then((_) => _loadData());
+          );
+          // Check if a new flashcard was added, and reload data
+          if (result == true) {
+          _loadData(); // Reload the flashcard data when a new one is added
+          }
         },
         child: Icon(Icons.add),
       ),
