@@ -189,12 +189,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     ? Colors.blue.shade100
                     : _flashcards[index].dirty > 3 * (12 - globals.cleanlinessLevel)
                     ? const Color(0xFFEF5350)
-                    : null,
-                surfaceTintColor: _flashcards[index].dirty > 0 &&
+                    : _flashcards[index].dirty > 0 &&
                     _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
-                    ? Colors.yellow.shade700
+                    ? const Color.fromRGBO(255, 255, 128, 0.7)
                     : (_flashcards[index].dirty >= (12 - globals.cleanlinessLevel)
-                    ? Colors.red.shade700
+                    ? const Color.fromRGBO(255, 153, 153, 0.7)
                     : Colors.transparent),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -255,7 +254,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           );
           // Check if a new flashcard was added, and reload data
           if (result == true) {
-            _loadData(); // Reload the flashcard data when a new one is added
+            _loadData(); // Reload the flashcard data when a n`ew one is added
           }
         },
         child: Icon(Icons.add),
