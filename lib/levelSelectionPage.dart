@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; // Import image_picker for selecting images
+import 'dart:io'; // For File class
 import 'package:laundry_lust/cloth_data/main_DB.dart'; // Ensure you import your laundryData class
 import 'cloth_data/change_clothes.dart'; // Import change_clothes for update functions
 
-class LevelSelectionPage extends StatelessWidget {
+class LevelSelectionPage extends StatefulWidget {
   final laundryData laundryItem;
 
   LevelSelectionPage({required this.laundryItem});
 
+  @override
+  _LevelSelectionPageState createState() => _LevelSelectionPageState();
+}
+
+class _LevelSelectionPageState extends State<LevelSelectionPage> {
+  File? _image;
+
   Future<void> _updateDirtyLevel(int increment, BuildContext context) async {
     // Increase the dirty value by the increment
     laundryData updatedLaundryItem = laundryData(
-      id: laundryItem.id,
-      pic: laundryItem.pic,
+      id: widget.laundryItem.id,
+      pic: widget.laundryItem.pic,
       lastWorn: DateTime.now().millisecondsSinceEpoch,
-      dirty: laundryItem.dirty + increment, // Update the dirty value
-      name: laundryItem.name,
+      dirty: widget.laundryItem.dirty + increment, // Update the dirty value
+      name: widget.laundryItem.name,
     );
     // Call the update function to update the database
     await updatelaundry(updatedLaundryItem);
@@ -22,6 +31,15 @@ class LevelSelectionPage extends StatelessWidget {
     // Pop the page to return to the previous screen
     Navigator.pop(context);
   }
+  //
+  // Future<void> _pickImage() async {
+  //   final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _image = File(pickedFile.path);
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +57,24 @@ class LevelSelectionPage extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // GestureDetector(
+          //   onTap: _pickImage, // Allow the user to tap to change the image
+          //   child: CircleAvatar(
+          //     radius: 80,
+          //     backgroundImage: _image != null
+          //         ? FileImage(_image!) // Show the selected image
+          //         : FileImage(File(widget.laundryItem.pic)), // Show the existing image
+          //     child: Align(
+          //       alignment: Alignment.bottomRight,
+          //       child: Icon(
+          //         Icons.edit,
+          //         color: Colors.blue,
+          //         size: 24,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -96,7 +132,7 @@ class LevelSelectionPage extends StatelessWidget {
                       padding: EdgeInsets.all(24),
                     ),
                     child: Text(
-                      '💪😅\nWorkout\n(fully wet)',
+                      '💪\nWorkout\n(fully wet)',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 14),
                     ),
