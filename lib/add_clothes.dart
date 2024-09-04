@@ -48,7 +48,7 @@ class _AddClothesState extends State<AddClothes> {
       laundryData newClothing = laundryData(
         id: idset, // Example id
         name: _nameController.text,
-        lastWorn: DateTime.now().minute, // Default value for lastWorn
+        lastWorn: DateTime.now().millisecondsSinceEpoch, // Default value for lastWorn
         dirty: 0, // Default value for dirty
         pic: _image!.path,
       );
@@ -57,9 +57,9 @@ class _AddClothesState extends State<AddClothes> {
       await insertlaundry(newClothing);
 
       // Navigate back to the Home page
-      print("---------------------------------------------------${newClothing.name} ${newClothing.id} ${newClothing.dirty} ${newClothing.pic} ${newClothing.lastWorn} -----------------------------------------------------");
+      print("-----------------------------------${newClothing.name} ${newClothing.id} ${newClothing.dirty} ${newClothing.pic} ${newClothing.lastWorn} -----------------------------------------------------");
 
-      Navigator.pop(context);
+      Navigator.pop(context,true);
     }
   }
 
