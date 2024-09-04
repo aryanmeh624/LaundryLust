@@ -21,10 +21,10 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
   bool hasSetCleanliness = prefs.getBool('hasSetCleanliness') ?? false;
-  prefs.setInt('idn', 0);
+
   Widget defaultHome;
   if (!hasSeenIntro) {
-
+    prefs.setInt('idn', 0);
     defaultHome = IntroPage();
   } else if (!hasSetCleanliness) {
     defaultHome = IntroPage();

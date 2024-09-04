@@ -13,6 +13,7 @@ import 'cloth_data/main_DB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'global.dart';
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -45,6 +46,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       return '${difference.inDays} days ago';
     }
   }
+
   Future<void> _loadData() async {
     try {
       // Fetch the list of laundry data from the database
@@ -53,7 +55,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       print('Fetched laundry data: $laundryDataList');
       // Clear the current flashcards list before repopulating it
       setState(() {
-        _flashcards.clear();// Clear the list to avoid duplicates
+        _flashcards.clear(); // Clear the list to avoid duplicates
         for (var data in laundryDataList) {
           _flashcards.add(pog.laundryData(
             name: data.name,
@@ -65,7 +67,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         }
         // Debugging: Print the flashcards list to ensure all rows are added
         print('Mapped flashcards: $_flashcards');
-        _isLoading = false;// Set loading to false once data is loaded
+        _isLoading = false; // Set loading to false once data is loaded
       });
     } catch (e) {
       setState(() {
@@ -75,7 +77,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       print('Error loading data: $e');
     }
   }
-
 
   void _editSelectedFlashcard(int index) {
     Navigator.push(
@@ -97,11 +98,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     // Setup a periodic timer to refresh the flashcards every 60 seconds
     _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      _loadData();  // Refresh the data
-      setState(() {});  // Rebuild the UI to reflect updated times
+      _loadData(); // Refresh the data
+      setState(() {}); // Rebuild the UI to reflect updated times
     });
     // Initialize the animation controller and animation
-
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 2),
@@ -140,10 +140,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         title: Text('Home'),
         actions: [
+          // New button to navigate to CleanlinessPage
+          IconButton(
+            icon: Icon(Icons.cleaning_services), // Choose an appropriate icon
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CleanlinessPage(), // Navigate to CleanlinessPage
+                ),
+              );
+            },
+          ),
           if (_selectedIndices.isNotEmpty)
             IconButton(
               icon: Icon(Icons.delete),
-              onPressed: null,
+              onPressed: null, // Implement delete action if needed
             ),
         ],
       ),
@@ -154,7 +166,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             : ListView.builder(
           itemCount: _flashcards.length,
           itemBuilder: (context, index) {
-            int data;
             return GestureDetector(
               onTap: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -174,10 +185,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 _toggleSelection(index);
               },
               child: Card(
-
-
-                color: _selectedIndices.contains(index) ? Colors.blue.shade100 : _flashcards[index].dirty>3*(12-globals.cleanlinessLevel)?const Color(0xFFEF5350):null,
-                surfaceTintColor: _flashcards[index].dirty > 0 && _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
+                color: _selectedIndices.contains(index)
+                    ? Colors.blue.shade100
+                    : _flashcards[index].dirty > 3 * (12 - globals.cleanlinessLevel)
+                    ? const Color(0xFFEF5350)
+                    : null,
+                surfaceTintColor: _flashcards[index].dirty > 0 &&
+                    _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
                     ? Colors.yellow.shade700
                     : (_flashcards[index].dirty >= (12 - globals.cleanlinessLevel)
                     ? Colors.red.shade700
@@ -234,14 +248,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         child: Icon(Icons.more_vert),
       )
           : FloatingActionButton(
-        onPressed: () async{
+        onPressed: () async {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddClothes()),
           );
           // Check if a new flashcard was added, and reload data
           if (result == true) {
-          _loadData(); // Reload the flashcard data when a new one is added
+            _loadData(); // Reload the flashcard data when a new one is added
           }
         },
         child: Icon(Icons.add),
