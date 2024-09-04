@@ -2,17 +2,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:laundry_lust/levelSelectionPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'cleanliness_page.dart';
+import 'cleanliness_page.dart'; // Import CleanlinessPage
 import 'cloth_data/get_clothes.dart';
 import 'global.dart' as globals;
 import 'add_clothes.dart';
-import 'flashcard.dart';
 import 'dart:io';
 import 'cloth_data/main_DB.dart' as pog;
 import 'cloth_data/main_DB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'global.dart';
+import 'edit_page.dart'; // New Edit Page import
 
 class Home extends StatefulWidget {
   @override
@@ -82,11 +81,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LevelSelectionPage(laundryItem: _flashcards[index]),
+        builder: (context) => EditPage(laundryItem: _flashcards[index]), // Navigate to EditPage
       ),
     ).then((_) {
-      _selectedIndices.clear();
-      _loadData();
+      _selectedIndices.clear(); // Clear selections when coming back
+      _loadData(); // Refresh data
     });
   }
 
@@ -97,11 +96,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     _loadData();
 
     // Setup a periodic timer to refresh the flashcards every 60 seconds
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 34), (timer) {
       _loadData(); // Refresh the data
       setState(() {}); // Rebuild the UI to reflect updated times
     });
     // Initialize the animation controller and animation
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 2),
@@ -140,9 +140,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         title: Text('Home'),
         actions: [
-          // New button to navigate to CleanlinessPage
+          // Add Cleanliness Icon Button to AppBar
           IconButton(
-            icon: Icon(Icons.cleaning_services), // Choose an appropriate icon
+            icon: Icon(Icons.clean_hands),
             onPressed: () {
               Navigator.push(
                 context,
@@ -152,6 +152,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               );
             },
           ),
+          if (_selectedIndices.length == 1) // Show only when one item is selected
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                _editSelectedFlashcard(_selectedIndices.first); // Edit selected flashcard
+              },
+            ),
           if (_selectedIndices.isNotEmpty)
             IconButton(
               icon: Icon(Icons.delete),
@@ -173,6 +180,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 if (_selectedIndices.isNotEmpty) {
                   _toggleSelection(index);
                 } else {
+                  // Navigate to LevelSelectionPage on a single tap
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -226,6 +234,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       floatingActionButton: _selectedIndices.isNotEmpty
           ? FloatingActionButton(
         onPressed: () {
+          print("Floating action button pressed!"); // Debugging
+
+          // Show bottom sheet with options (Edit/Delete, etc.)
           showModalBottomSheet(
             context: context,
             builder: (BuildContext context) {
@@ -235,10 +246,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     leading: Icon(Icons.edit),
                     title: Text('Edit'),
                     onTap: () {
-                      _editSelectedFlashcard(_selectedIndices.first);
+                      print("Edit option tapped!"); // Debugging
+                      // Close the BottomSheet before navigating
                       Navigator.pop(context);
+
+                      // Ensure we have a valid selected index
+                      if (_selectedIndices.isNotEmpty) {
+                        _editSelectedFlashcard(_selectedIndices.first);
+                      }
                     },
                   ),
+                  // You can add more actions like delete, etc.
                 ],
               );
             },
@@ -254,7 +272,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           );
           // Check if a new flashcard was added, and reload data
           if (result == true) {
-            _loadData(); // Reload the flashcard data when a n`ew one is added
+            _loadData(); // Reload the flashcard data when a new one is added
           }
         },
         child: Icon(Icons.add),

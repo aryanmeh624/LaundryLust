@@ -9,7 +9,7 @@ class laundryData{
   final String pic;
   final int lastWorn;
   int dirty;
-  final String name;
+  late final String name;
 
   laundryData({
     required this.id,
