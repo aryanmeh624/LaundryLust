@@ -17,7 +17,7 @@ class LevelSelectionPage extends StatelessWidget {
       name: laundryItem.name,
     );
     // Call the update function to update the database
-    await updatelaundry(laundryItem);
+    await updatelaundry(updatedLaundryItem);
 
     // Pop the page to return to the previous screen
     Navigator.pop(context);
@@ -39,6 +39,15 @@ class LevelSelectionPage extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'How was your use of the cloth today?',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -51,8 +60,9 @@ class LevelSelectionPage extends StatelessWidget {
                       padding: EdgeInsets.all(24),
                     ),
                     child: Text(
-                      '😊',
-                      style: TextStyle(fontSize: 24),
+                      '😊🌤️\nCool day\n(no sweat)',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
                     ),
                   ),
                   SizedBox(height: 8),
@@ -68,8 +78,9 @@ class LevelSelectionPage extends StatelessWidget {
                       padding: EdgeInsets.all(24),
                     ),
                     child: Text(
-                      '😎',
-                      style: TextStyle(fontSize: 24),
+                      '😅🌞\nHot but\nno workout',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
                     ),
                   ),
                   SizedBox(height: 8),
@@ -85,8 +96,9 @@ class LevelSelectionPage extends StatelessWidget {
                       padding: EdgeInsets.all(24),
                     ),
                     child: Text(
-                      '🤯',
-                      style: TextStyle(fontSize: 24),
+                      '💪😅\nWorkout\n(fully wet)',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
                     ),
                   ),
                   SizedBox(height: 8),
@@ -94,21 +106,6 @@ class LevelSelectionPage extends StatelessWidget {
                 ],
               ),
             ],
-          ),
-          Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 32.0),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // You can add functionality for deleting or resetting the dirty value here.
-              },
-              icon: Icon(Icons.delete),
-              label: Text(''),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                shape: CircleBorder(),
-              ),
-            ),
           ),
         ],
       ),
