@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'cloth_data/change_clothes.dart';
 import 'cloth_data/main_DB.dart';
 import 'package:image/image.dart' as img;
-
+import 'package:shared_preferences/shared_preferences.dart';
 class AddClothes extends StatefulWidget {
   @override
   _AddClothesState createState() => _AddClothesState();
@@ -41,10 +41,12 @@ class _AddClothesState extends State<AddClothes> {
     if (_formKey.currentState!.validate() && _image != null) {
       // // Convert the image to Uint8List
       // Uint8List imageBytes = await _image!.readAsBytes();
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int idset = prefs.getInt('idn')!.toInt();
+      prefs.setInt('idn', idset+1);
       // Create a new laundryData object
       laundryData newClothing = laundryData(
-        id: DateTime.now().microsecondsSinceEpoch, // Example id
+        id: idset, // Example id
         name: _nameController.text,
         lastWorn: DateTime.now().minute, // Default value for lastWorn
         dirty: 0, // Default value for dirty
