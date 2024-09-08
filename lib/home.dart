@@ -11,7 +11,8 @@ import 'cloth_data/main_DB.dart' as pog;
 import 'cloth_data/main_DB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'global.dart';
-import 'edit_page.dart'; // New Edit Page import
+import 'edit_page.dart';
+import 'notification_service.dart'; // New Edit Page import
 
 class Home extends StatefulWidget {
   @override
@@ -51,7 +52,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       // Fetch the list of laundry data from the database
       var laundryDataList = await laundryGet();
       // Debugging: Print the fetched list to ensure it contains all rows
-      print('Fetched laundry data: $laundryDataList');
+      //print('Fetched laundry data: $laundryDataList');
       // Clear the current flashcards list before repopulating it
       setState(() {
         _flashcards.clear(); // Clear the list to avoid duplicates
@@ -65,7 +66,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ));
         }
         // Debugging: Print the flashcards list to ensure all rows are added
-        print('Mapped flashcards: $_flashcards');
+        //print('Mapped flashcards: $_flashcards');
         _isLoading = false; // Set loading to false once data is loaded
       });
     } catch (e) {
@@ -76,6 +77,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       print('Error loading data: $e');
     }
   }
+
+
 
   void _editSelectedFlashcard(int index) {
     Navigator.push(
@@ -96,7 +99,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     _loadData();
 
     // Setup a periodic timer to refresh the flashcards every 60 seconds
-    _timer = Timer.periodic(Duration(milliseconds: 34), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 33), (timer) {
       _loadData(); // Refresh the data
       setState(() {}); // Rebuild the UI to reflect updated times
     });
@@ -177,18 +180,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               onTap: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel')!.toInt();
+
                 if (_selectedIndices.isNotEmpty) {
                   _toggleSelection(index);
                 } else {
-                  // Navigate to LevelSelectionPage on a single tap
+                  // Navigate to LevelSelectionPage and pass the checkwashing function
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => LevelSelectionPage(laundryItem: _flashcards[index]),
+                      builder: (context) => LevelSelectionPage(
+                        laundryItem: _flashcards[index],
+                        checkWashingCallback: checkwashing, // Pass checkwashing callback
+                      ),
                     ),
                   );
                 }
               },
+
               onLongPress: () {
                 _toggleSelection(index);
               },
@@ -279,4 +287,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ),
     );
   }
+  Future<void> checkwashing() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int count =1;
+    for(var currcloth in _flashcards){
+      int dirty = currcloth.dirty;
+      if(dirty>=(12 - globals.cleanlinessLevel)){
+        count = count+1;
+      }
+    }
+    print("__________________________________________________________________________________");
+    print(count);
+    print(prefs.getInt('washfreq')!.toInt());
+    if(count>=prefs.getInt('washfreq')!.toInt()){
+      print("REACHED");
+      NotificationService().showInstantNotification();
+    }
+  }
 }
+

@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker for selecting images
 import 'dart:io'; // For File class
+import 'home.dart' as home;
 import 'package:laundry_lust/cloth_data/main_DB.dart'; // Ensure you import your laundryData class
 import 'cloth_data/change_clothes.dart'; // Import change_clothes for update functions
 
 class LevelSelectionPage extends StatefulWidget {
   final laundryData laundryItem;
+  final Function checkWashingCallback; // Add the callback
 
-  LevelSelectionPage({required this.laundryItem});
+  LevelSelectionPage({required this.laundryItem, required this.checkWashingCallback}); // Pass the callback
 
   @override
   _LevelSelectionPageState createState() => _LevelSelectionPageState();
 }
 
 class _LevelSelectionPageState extends State<LevelSelectionPage> {
-  File? _image;
-
   Future<void> _updateDirtyLevel(int increment, BuildContext context) async {
-    // Increase the dirty value by the increment
+    // Update the dirty value by the increment
     laundryData updatedLaundryItem = laundryData(
       id: widget.laundryItem.id,
       pic: widget.laundryItem.pic,
@@ -25,21 +25,11 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
       dirty: widget.laundryItem.dirty + increment, // Update the dirty value
       name: widget.laundryItem.name,
     );
-    // Call the update function to update the database
     await updatelaundry(updatedLaundryItem);
-
+     // Call the callback
     // Pop the page to return to the previous screen
-    Navigator.pop(context,true);
+    Navigator.pop(context, true);
   }
-  //
-  // Future<void> _pickImage() async {
-  //   final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _image = File(pickedFile.path);
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +40,7 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context,true);
+            Navigator.pop(context, true);
           },
         ),
       ),
@@ -73,7 +63,10 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
               Column(
                 children: [
                   ElevatedButton(
-                    onPressed: () => _updateDirtyLevel(1, context),
+                  onPressed: (){
+                  _updateDirtyLevel(1, context);
+                  widget.checkWashingCallback();
+                  },
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
                       padding: EdgeInsets.all(24),
@@ -91,7 +84,10 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
               Column(
                 children: [
                   ElevatedButton(
-                    onPressed: () => _updateDirtyLevel(2, context),
+                    onPressed: (){
+                      _updateDirtyLevel(2, context);
+                      widget.checkWashingCallback();
+                    }, // Level 2
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
                       padding: EdgeInsets.all(24),
@@ -109,7 +105,10 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
               Column(
                 children: [
                   ElevatedButton(
-                    onPressed: () => _updateDirtyLevel(3, context),
+                    onPressed: (){
+                    _updateDirtyLevel(3, context);
+                    widget.checkWashingCallback();
+                    },
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
                       padding: EdgeInsets.all(24),
@@ -126,7 +125,6 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
               ),
             ],
           ),
-
         ],
       ),
     );

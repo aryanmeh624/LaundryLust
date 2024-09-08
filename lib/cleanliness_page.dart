@@ -121,7 +121,7 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                   value: _currentSliderValuewas,
                   min: 1,
                   max: 30,
-                  divisions: 9,
+                  divisions: 29,
                   activeColor: Colors.indigo,
                   inactiveColor: Colors.indigo[100],
                   label: _currentSliderValuewas.round().toString(),

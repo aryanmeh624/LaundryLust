@@ -3,11 +3,15 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'intro_page.dart';
+import 'notification_service.dart';
 import 'cleanliness_page.dart';
 import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize notification service
+  NotificationService().initializeNotifications();
 
   // Initialize the database and create the table if it doesn't exist
   final database = await openDatabase(
