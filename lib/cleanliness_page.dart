@@ -9,7 +9,7 @@ class CleanlinessPage extends StatefulWidget {
 
 class _CleanlinessPageState extends State<CleanlinessPage> {
   double _currentSliderValue = 1.0;
-
+  double _currentSliderValuewas = 1.0;
   // List of descriptions for each slider value
   final List<String> cleanlinessDescriptions = [
     "Very dirty",  // 1
@@ -34,12 +34,14 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _currentSliderValue = (prefs.getInt('cleanlinessLevel') ?? 1).toDouble();
+      _currentSliderValuewas = (prefs.getInt('washfreq')??1).toDouble();
     });
   }
 
   Future<void> _saveCleanlinessLevel() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('cleanlinessLevel', _currentSliderValue.round());
+    await prefs.setInt('cleanlinessLevel', _currentSliderValue.round()==10? _currentSliderValue.round()-1:_currentSliderValue.round());
+    await prefs.setInt('washfreq', _currentSliderValuewas.round()==10? _currentSliderValuewas.round()-1:_currentSliderValuewas.round());
   }
 
   @override
@@ -47,9 +49,9 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
     return Scaffold(
       backgroundColor: Colors.lightBlue[50],
       appBar: AppBar(
-        title: Center(
+        title: const Center(
           child: Text(
-            'How Clean Are You?',
+            'About You',
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -68,23 +70,8 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                AnimatedContainer(
-                  duration: Duration(seconds: 1),
-                  curve: Curves.easeInOut,
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.indigoAccent.withOpacity(0.1),
-                  ),
-                  child: Icon(
-                    Icons.local_laundry_service,
-                    size: 100,
-                    color: Colors.indigo,
-                  ),
-                ),
-                SizedBox(height: 40),
-                Text(
-                  'How clean are you?',
+                const Text(
+                  'Hygiene level?',
                   style: TextStyle(
                     color: Colors.indigo,
                     fontSize: 28,
@@ -93,7 +80,7 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Slider(
                   value: _currentSliderValue,
                   min: 1,
@@ -108,22 +95,47 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                     });
                   },
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Display the description corresponding to the slider value
                 Text(
                   cleanlinessDescriptions[_currentSliderValue.round() - 1],
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.indigo,
                     fontSize: 18,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 20),
+                const Text(
+                  'Clothes washed per load?',
+                  style: TextStyle(
+                    color: Colors.indigo,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Slider(
+                  value: _currentSliderValuewas,
+                  min: 1,
+                  max: 30,
+                  divisions: 9,
+                  activeColor: Colors.indigo,
+                  inactiveColor: Colors.indigo[100],
+                  label: _currentSliderValuewas.round().toString(),
+                  onChanged: (double valuewas) {
+                    setState(() {
+                      _currentSliderValuewas = valuewas;
+                    });
+                  },
+                ),
+                const SizedBox(height: 40),
                 GestureDetector(
                   onTap: () async {
                     SharedPreferences prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('hasSetCleanliness', true);
-
                     await _saveCleanlinessLevel();
                     Navigator.pushReplacement(
                       context,
@@ -133,7 +145,7 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         colors: [Colors.indigo, Colors.blue],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -147,7 +159,7 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                       ],
                     ),
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(

@@ -57,23 +57,6 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // GestureDetector(
-          //   onTap: _pickImage, // Allow the user to tap to change the image
-          //   child: CircleAvatar(
-          //     radius: 80,
-          //     backgroundImage: _image != null
-          //         ? FileImage(_image!) // Show the selected image
-          //         : FileImage(File(widget.laundryItem.pic)), // Show the existing image
-          //     child: Align(
-          //       alignment: Alignment.bottomRight,
-          //       child: Icon(
-          //         Icons.edit,
-          //         color: Colors.blue,
-          //         size: 24,
-          //       ),
-          //     ),
-          //   ),
-          // ),
           SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -143,6 +126,7 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
               ),
             ],
           ),
+
         ],
       ),
     );
