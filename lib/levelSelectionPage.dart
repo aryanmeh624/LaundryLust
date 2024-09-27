@@ -88,7 +88,7 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
                               },
                               style: ElevatedButton.styleFrom(
                                 shape: CircleBorder(),
-                                padding: EdgeInsets.all(16), // Adjust padding if necessary
+                                padding: EdgeInsets.all(0), // Adjust padding if necessary
                               ),
                               child: Text(
                                 '😊🌤️\nCool day\n(no sweat)',
@@ -113,7 +113,7 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
                               },
                               style: ElevatedButton.styleFrom(
                                 shape: CircleBorder(),
-                                padding: EdgeInsets.all(16), // Adjust padding if necessary
+                                padding: EdgeInsets.all(0), // Adjust padding if necessary
                               ),
                               child: Text(
                                 '😅🌞\nHot but\nno workout',
@@ -138,7 +138,7 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
                               },
                               style: ElevatedButton.styleFrom(
                                 shape: CircleBorder(),
-                                padding: EdgeInsets.all(16), // Adjust padding if necessary
+                                padding: EdgeInsets.all(0), // Adjust padding if necessary
                               ),
                               child: Text(
                                 '💪\nWorkout\n(fully wet)',

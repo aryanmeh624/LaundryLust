@@ -37,6 +37,32 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
+  // Function to check if all selected items have dirty == -1
+  bool _allSelectedAreDrying() {
+    return _selectedIndices.every((index) => _flashcards[index].dirty == -1);
+  }
+
+  Future<void> _deleteSelectedClothes() async {
+    List<laundryData> selectedLaundry = _selectedIndices.map((index) => _flashcards[index]).toList();
+    for (var laundry in selectedLaundry) {
+      await deleteLaundryById(laundry.id);  // Call your database delete function
+    }
+    setState(() {
+      _flashcards.removeWhere((item) => _selectedIndices.contains(_flashcards.indexOf(item)));
+      _selectedIndices.clear();  // Clear selection after deleting
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Selected clothes deleted successfully!')),
+    );
+  }
+
+  Future<void> _showDeleteConfirmationDialog() async {
+    bool? confirmed = await deleteConfirmationDialog(context);
+    if (confirmed == true) {
+      _deleteSelectedClothes();  // If confirmed, delete the selected clothes
+    }
+  }
+
   // Calculate the time difference between the last worn time and the current time
   String _calculateTimeDifference(int lastWorn) {
     DateTime lastWornTime = DateTime.fromMillisecondsSinceEpoch(lastWorn);
@@ -130,11 +156,33 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
-  void _confirmWashSelectedClothes() async {
-    bool? confirmed = await showConfirmationDialog(context);
+  void _confirmPickupSelectedClothes() async {
+    bool? confirmed = await pickupConfirmationDialog(context);
     if (confirmed == true) {
-      _washSelectedClothes(); // Call the washing function if confirmed
+      _pickupSelectedClothes(); // Call the washing function if confirmed
     }
+  }
+
+  void _pickupSelectedClothes() async {
+    // Extract the selected laundry items based on _selectedIndices
+    List<laundryData> selectedLaundry = _selectedIndices.map((index) => _flashcards[index]).toList();
+
+    // Reset 'dirty' levels to 0 in both UI and database
+    await pickupSelectedClothes(selectedLaundry);
+
+    // Update the UI by setting the 'dirty' values to 0 and changing the color
+    setState(() {
+      for (int index in _selectedIndices) {
+        _flashcards[index].dirty = 0; // Reset the 'dirty' level in memory
+      }
+      _selectedIndices.clear(); // Clear selections after washing
+    });
+
+    // Optionally, give some feedback to the user
+    HapticFeedback.heavyImpact(); // Vibrate to indicate success
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Selected clothes washed successfully!')),
+    );
   }
 
   void _washSelectedClothes() async {
@@ -188,6 +236,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         title: Text('Stay Clean!'),
         actions: [
+
+          // Show the delete button only if all selected items have dirty == -1
+          if (_selectedIndices.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: _showDeleteConfirmationDialog,  // Show confirmation dialog
+            ),
+          if(_selectedIndices.isNotEmpty && _allSelectedAreDrying())
+            IconButton(
+              icon: Icon(Icons.air),
+              onPressed: _confirmPickupSelectedClothes,
+            ),
           // Add Cleanliness Icon Button to AppBar
           IconButton(
             icon: Icon(Icons.clean_hands),
@@ -207,11 +267,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           //       _editSelectedFlashcard(_selectedIndices.first); // Edit selected flashcard
           //     },
           //   ),
-          if (_selectedIndices.isNotEmpty)
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: null, // Implement delete action if needed
-            ),
+          // if (_selectedIndices.isNotEmpty)
+          //   IconButton(
+          //     icon: Icon(Icons.delete),
+          //     onPressed: null, // Implement delete action if needed
+          //   ),
         ],
       ),
       body: GestureDetector(
