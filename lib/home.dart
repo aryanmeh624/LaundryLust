@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:laundry_lust/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:laundry_lust/levelSelectionPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cleanliness_page.dart'; // Import CleanlinessPage
+import 'cloth_data/change_clothes.dart';
 import 'cloth_data/get_clothes.dart';
 import 'global.dart' as globals;
 import 'add_clothes.dart';
@@ -99,7 +102,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     _loadData();
 
     // Setup a periodic timer to refresh the flashcards every 60 seconds
-    _timer = Timer.periodic(Duration(milliseconds: 33), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 300), (timer) {
       _loadData(); // Refresh the data
       setState(() {}); // Rebuild the UI to reflect updated times
     });
@@ -127,21 +130,63 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
+  void _confirmWashSelectedClothes() async {
+    bool? confirmed = await showConfirmationDialog(context);
+    if (confirmed == true) {
+      _washSelectedClothes(); // Call the washing function if confirmed
+    }
+  }
+
+  void _washSelectedClothes() async {
+    // Extract the selected laundry items based on _selectedIndices
+    List<laundryData> selectedLaundry = _selectedIndices.map((index) => _flashcards[index]).toList();
+
+    // Reset 'dirty' levels to 0 in both UI and database
+    await washSelectedClothes(selectedLaundry);
+
+    // Update the UI by setting the 'dirty' values to 0 and changing the color
+    setState(() {
+      for (int index in _selectedIndices) {
+        _flashcards[index].dirty = -1; // Reset the 'dirty' level in memory
+      }
+      _selectedIndices.clear(); // Clear selections after washing
+    });
+
+    // Optionally, give some feedback to the user
+    HapticFeedback.heavyImpact(); // Vibrate to indicate success
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Selected clothes washed successfully!')),
+    );
+  }
+
   void _toggleSelection(int index) {
     setState(() {
       if (_selectedIndices.contains(index)) {
         _selectedIndices.remove(index);
       } else {
         _selectedIndices.add(index);
+        HapticFeedback.lightImpact();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+      if (_selectedIndices.isNotEmpty) {
+        // If there are selected indices, deselect them and prevent back navigation
+        setState(() {
+          _selectedIndices.clear();
+        });
+        return false; // Prevents back navigation
+      } else {
+        return true; // Allows back navigation
+      }
+    },
+    child: Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: Text('Stay Clean!'),
         actions: [
           // Add Cleanliness Icon Button to AppBar
           IconButton(
@@ -155,13 +200,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               );
             },
           ),
-          if (_selectedIndices.length == 1) // Show only when one item is selected
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                _editSelectedFlashcard(_selectedIndices.first); // Edit selected flashcard
-              },
-            ),
+          // if (_selectedIndices.length == 1) // Show only when one item is selected
+          //   IconButton(
+          //     icon: Icon(Icons.edit),
+          //     onPressed: () {
+          //       _editSelectedFlashcard(_selectedIndices.first); // Edit selected flashcard
+          //     },
+          //   ),
           if (_selectedIndices.isNotEmpty)
             IconButton(
               icon: Icon(Icons.delete),
@@ -170,81 +215,109 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ],
       ),
       body: GestureDetector(
-        onTap: _selectedIndices.isNotEmpty ? _deselectAll : null,
+        // onTap: _selectedIndices.isNotEmpty ? _deselectAll : null,
         child: _isLoading
             ? Center(child: CircularProgressIndicator())
-            : ListView.builder(
-          itemCount: _flashcards.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel')!.toInt();
+            : Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child:
+                ListView.builder(
 
-                if (_selectedIndices.isNotEmpty) {
-                  _toggleSelection(index);
-                } else {
-                  // Navigate to LevelSelectionPage and pass the checkwashing function
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LevelSelectionPage(
-                        laundryItem: _flashcards[index],
-                        checkWashingCallback: checkwashing, // Pass checkwashing callback
+                  itemCount: _flashcards.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.2),
+                      child: GestureDetector(
+                        onTap: () async {
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel')!.toInt();
+
+                          if (_selectedIndices.isNotEmpty) {
+                            _toggleSelection(index);
+                          } else {
+                            // Navigate to LevelSelectionPage and pass the checkwashing function
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LevelSelectionPage(
+                                  laundryItem: _flashcards[index],
+                                  checkWashingCallback: checkwashing, // Pass checkwashing callback
+                                ),
+                              ),
+                            );
+                          }
+                        },
+
+                        onLongPress: () {
+                          _toggleSelection(index);
+                        },
+                        child: Card(
+                          color: _selectedIndices.contains(index)
+                              ? Colors.blue.shade100
+                              : _flashcards[index].dirty == -1
+                              ? Colors.grey.shade300 // Greyed out color when washed
+                              : _flashcards[index].dirty > 3 * (12 - globals.cleanlinessLevel)
+                              ? const Color(0xFFEF5350)
+                              : _flashcards[index].dirty > 0 &&
+                              _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
+                              ? const Color.fromRGBO(255, 255, 128, 0.7)
+                              : (_flashcards[index].dirty >= (12 - globals.cleanlinessLevel)
+                              ? const Color.fromRGBO(255, 153, 153, 0.7)
+                              : Colors.transparent),
+
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListTile(
+                              // Image: Apply a grey filter if dirty == -1
+                              leading: _flashcards[index].pic != null && _flashcards[index].pic.isNotEmpty
+                                  ? ColorFiltered(
+                                colorFilter: _flashcards[index].dirty == -1
+                                    ? ColorFilter.mode(Colors.grey, BlendMode.saturation) // Apply grayscale
+                                    : ColorFilter.mode(Colors.transparent, BlendMode.saturation),
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    image: DecorationImage(
+                                      image: FileImage(File(_flashcards[index].pic)),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              )
+                                  : Icon(Icons.image_not_supported),
+
+                              // Title and Subtitle Text: Set to grey if dirty == -1
+                              title: Text(
+                                _flashcards[index].name,
+                                style: TextStyle(
+                                  color: _flashcards[index].dirty == -1 ? Colors.grey : Colors.black, // Grey font when washed
+                                ),
+                              ),
+                              subtitle: Text(
+                                _flashcards[index].dirty == -1
+                                    ? 'Last Worn: ${_calculateTimeDifference(_flashcards[index].lastWorn)}\nThe cloth is drying right now.'
+                                    : 'Last Worn: ${_calculateTimeDifference(_flashcards[index].lastWorn)}\nDirty: ${_flashcards[index].dirty}',
+                                style: TextStyle(
+                                  color: _flashcards[index].dirty == -1 ? Colors.grey : Colors.black, // Grey subtitle when washed
+                                ),
+                              ),
+                            ),
+                          ),
                       ),
                     ),
                   );
-                }
-              },
-
-              onLongPress: () {
-                _toggleSelection(index);
-              },
-              child: Card(
-                color: _selectedIndices.contains(index)
-                    ? Colors.blue.shade100
-                    : _flashcards[index].dirty > 3 * (12 - globals.cleanlinessLevel)
-                    ? const Color(0xFFEF5350)
-                    : _flashcards[index].dirty > 0 &&
-                    _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
-                    ? const Color.fromRGBO(255, 255, 128, 0.7)
-                    : (_flashcards[index].dirty >= (12 - globals.cleanlinessLevel)
-                    ? const Color.fromRGBO(255, 153, 153, 0.7)
-                    : Colors.transparent),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    leading: _flashcards[index].pic != null && _flashcards[index].pic.isNotEmpty
-                        ? Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        image: DecorationImage(
-                          image: FileImage(File(_flashcards[index].pic)),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    )
-                        : Icon(Icons.image_not_supported),
-                    title: Text(_flashcards[index].name),
-                    subtitle: Text(
-                      'Last Worn: ${_calculateTimeDifference(_flashcards[index].lastWorn)}\n'
-                          'Dirty: ${_flashcards[index].dirty}',
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+                },
+            ),
+         ),
       ),
       floatingActionButton: _selectedIndices.isNotEmpty
           ? FloatingActionButton(
         onPressed: () {
           print("Floating action button pressed!"); // Debugging
 
-          // Show bottom sheet with options (Edit/Delete, etc.)
+          // Show bottom sheet with options (Edit/Delete, Wash, etc.)
           showModalBottomSheet(
             context: context,
             builder: (BuildContext context) {
@@ -262,6 +335,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       if (_selectedIndices.isNotEmpty) {
                         _editSelectedFlashcard(_selectedIndices.first);
                       }
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.local_laundry_service),
+                    title: Text('Wash Clothes'),
+                    onTap: () {
+                      print("Wash option tapped!"); // Debugging
+                      // Close the BottomSheet before proceeding with the wash action
+                      Navigator.pop(context);
+
+                      // Reset the 'dirty' value of selected clothes to 0 and change their color to purple
+                      _washSelectedClothes();
                     },
                   ),
                   // You can add more actions like delete, etc.
@@ -285,6 +370,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         },
         child: Icon(Icons.add),
       ),
+
+    )
     );
   }
   Future<void> checkwashing() async{

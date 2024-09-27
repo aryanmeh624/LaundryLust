@@ -69,8 +69,8 @@ class NotificationService {
     try {
       await flutterLocalNotificationsPlugin.show(
         0,
-        'Instant Notification',
-        'This is an instant notification.',
+        'Wash Clothes!',  // Updated title
+        'Your dirty clothes are piling up now!',  // Updated description
         notificationDetails,
       );
       print("Instant notification shown.");

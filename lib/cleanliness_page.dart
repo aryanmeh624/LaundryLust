@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 import 'home.dart';
 
 class CleanlinessPage extends StatefulWidget {
@@ -90,6 +91,7 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                   inactiveColor: Colors.indigo[100],
                   label: _currentSliderValue.round().toString(),
                   onChanged: (double value) {
+                    HapticFeedback.mediumImpact();
                     setState(() {
                       _currentSliderValue = value;
                     });
@@ -121,11 +123,13 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                   value: _currentSliderValuewas,
                   min: 1,
                   max: 30,
-                  divisions: 29,
+                  divisions: 29   ,
                   activeColor: Colors.indigo,
                   inactiveColor: Colors.indigo[100],
                   label: _currentSliderValuewas.round().toString(),
                   onChanged: (double valuewas) {
+                    HapticFeedback.lightImpact();
+
                     setState(() {
                       _currentSliderValuewas = valuewas;
                     });

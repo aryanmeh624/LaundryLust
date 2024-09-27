@@ -26,7 +26,7 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
       name: widget.laundryItem.name,
     );
     await updatelaundry(updatedLaundryItem);
-     // Call the callback
+    // Call the callback
     // Pop the page to return to the previous screen
     Navigator.pop(context, true);
   }
@@ -44,88 +44,121 @@ class _LevelSelectionPageState extends State<LevelSelectionPage> {
           },
         ),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'How was your use of the cloth today?',
-              style: TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Define percentage-based width for the buttons
+          double buttonWidth = constraints.maxWidth * 0.25; // 25% of the screen width
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 114.0), // Reduced top padding to shift content slightly down
+              child: Column(
+                mainAxisSize: MainAxisSize.min,  // Ensures the column doesn't stretch unnecessarily
+                children: [
+                  CircleAvatar(
+                    radius: 80,
+                    backgroundImage: // Show the selected image
+                    FileImage(File(widget.laundryItem.pic)), // Show the existing image
+                    child: Align(
+                      alignment: Alignment.topRight,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),  // Adjusted padding for uniformity
+                    child: Text(
+                      'How was your use of the cloth today?',
+                      style: TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: buttonWidth,
+                            height: buttonWidth, // Maintain square shape
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _updateDirtyLevel(1, context);
+                                widget.checkWashingCallback();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(),
+                                padding: EdgeInsets.all(16), // Adjust padding if necessary
+                              ),
+                              child: Text(
+                                '😊🌤️\nCool day\n(no sweat)',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text('Level 1'),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: buttonWidth,
+                            height: buttonWidth, // Maintain square shape
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _updateDirtyLevel(2, context);
+                                widget.checkWashingCallback();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(),
+                                padding: EdgeInsets.all(16), // Adjust padding if necessary
+                              ),
+                              child: Text(
+                                '😅🌞\nHot but\nno workout',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text('Level 2'),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: buttonWidth,
+                            height: buttonWidth, // Maintain square shape
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _updateDirtyLevel(3, context);
+                                widget.checkWashingCallback();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(),
+                                padding: EdgeInsets.all(16), // Adjust padding if necessary
+                              ),
+                              child: Text(
+                                '💪\nWorkout\n(fully wet)',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text('Level 3'),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24),  // Bottom padding to ensure space at the bottom
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  ElevatedButton(
-                  onPressed: (){
-                  _updateDirtyLevel(1, context);
-                  widget.checkWashingCallback();
-                  },
-                    style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(24),
-                    ),
-                    child: Text(
-                      '😊🌤️\nCool day\n(no sweat)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text('Level 1'),
-                ],
-              ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: (){
-                      _updateDirtyLevel(2, context);
-                      widget.checkWashingCallback();
-                    }, // Level 2
-                    style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(24),
-                    ),
-                    child: Text(
-                      '😅🌞\nHot but\nno workout',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text('Level 2'),
-                ],
-              ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: (){
-                    _updateDirtyLevel(3, context);
-                    widget.checkWashingCallback();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(24),
-                    ),
-                    child: Text(
-                      '💪\nWorkout\n(fully wet)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text('Level 3'),
-                ],
-              ),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
