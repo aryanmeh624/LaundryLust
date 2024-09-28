@@ -128,7 +128,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     _loadData();
 
     // Setup a periodic timer to refresh the flashcards every 60 seconds
-    _timer = Timer.periodic(Duration(milliseconds: 300), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 34), (timer) {
       _loadData(); // Refresh the data
       setState(() {}); // Rebuild the UI to reflect updated times
     });
@@ -233,8 +233,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       }
     },
     child: Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('Stay Clean!'),
+        backgroundColor: Colors.white,
+        elevation: 1,
         actions: [
 
           // Show the delete button only if all selected items have dirty == -1
@@ -289,25 +292,44 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       padding: const EdgeInsets.symmetric(horizontal: 3.2),
                       child: GestureDetector(
                         onTap: () async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel')!.toInt();
-
-                          if (_selectedIndices.isNotEmpty) {
-                            _toggleSelection(index);
+                          // Check if the cloth is in drying state (dirty == -1)
+                          if (_flashcards[index].dirty == -1) {
+                            // Show pickup confirmation dialog
+                            bool? confirmed = await pickupConfirmationDialog(context);
+                            if (confirmed == true) {
+                              List<laundryData> selectedLaundry = [_flashcards[index]]; // Single item in a list
+                              await pickupSelectedClothes(selectedLaundry);  // Call wash function
+                              // If user confirms, update the dirty value to 0
+                              setState(() {
+                                _flashcards[index].dirty = 0;  // Set dirty value to 0
+                              });
+                              // Optionally, give some feedback to the user
+                              HapticFeedback.heavyImpact(); // Vibrate to indicate success
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Cloth picked up successfully!')),
+                              );
+                            }
                           } else {
-                            // Navigate to LevelSelectionPage and pass the checkwashing function
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LevelSelectionPage(
-                                  laundryItem: _flashcards[index],
-                                  checkWashingCallback: checkwashing, // Pass checkwashing callback
+                            // If not drying, navigate to LevelSelectionPage as usual
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            globals.cleanlinessLevel = prefs.getInt('cleanlinessLevel')!.toInt();
+
+                            if (_selectedIndices.isNotEmpty) {
+                              _toggleSelection(index);
+                            } else {
+                              // Navigate to LevelSelectionPage and pass the checkwashing function
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LevelSelectionPage(
+                                    laundryItem: _flashcards[index],
+                                    checkWashingCallback: checkwashing, // Pass checkwashing callback
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           }
                         },
-
                         onLongPress: () {
                           _toggleSelection(index);
                         },
@@ -324,7 +346,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               : (_flashcards[index].dirty >= (12 - globals.cleanlinessLevel)
                               ? const Color.fromRGBO(255, 153, 153, 0.7)
                               : Colors.transparent),
-
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ListTile(
@@ -365,11 +386,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               ),
                             ),
                           ),
+                        ),
                       ),
-                    ),
-                  );
-                },
-            ),
+                    );
+                  },
+                ),
          ),
       ),
       floatingActionButton: _selectedIndices.isNotEmpty
