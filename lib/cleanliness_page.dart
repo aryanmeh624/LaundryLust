@@ -141,10 +141,11 @@ class _CleanlinessPageState extends State<CleanlinessPage> {
                     SharedPreferences prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('hasSetCleanliness', true);
                     await _saveCleanlinessLevel();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => Home()),
-                    );
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => Home()),
+                    // );
+                    Navigator.pop(context, true);
                   },
                   child: Container(
                     decoration: BoxDecoration(

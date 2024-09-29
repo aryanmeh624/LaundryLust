@@ -236,8 +236,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('Stay Clean!'),
-        backgroundColor: Colors.white,
-        elevation: 1,
+        // backgroundColor: Colors.white,
+        elevation: 1.0,
         actions: [
 
           // Show the delete button only if all selected items have dirty == -1
@@ -334,22 +334,33 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           _toggleSelection(index);
                         },
                         child: Card(
-                          color: _selectedIndices.contains(index)
-                              ? Colors.blue.shade100
-                              : _flashcards[index].dirty == -1
-                              ? Colors.grey.shade300 // Greyed out color when washed
-                              : _flashcards[index].dirty > 3 * (12 - globals.cleanlinessLevel)
-                              ? const Color(0xFFEF5350)
-                              : _flashcards[index].dirty > 0 &&
-                              _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
-                              ? const Color.fromRGBO(255, 255, 128, 0.7)
-                              : (_flashcards[index].dirty >= (12 - globals.cleanlinessLevel)
-                              ? const Color.fromRGBO(255, 153, 153, 0.7)
-                              : Colors.transparent),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          elevation: 0.0, // Keep elevation flat
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: _selectedIndices.contains(index)
+                                  ? null // No gradient when selected
+                                  : LinearGradient(
+                                colors: [
+                                  Colors.white, // Start with white
+                                  _flashcards[index].dirty == -1
+                                      ? Colors.grey.shade300 // Grey for drying clothes
+                                      : _flashcards[index].dirty > 3 * (12 - globals.cleanlinessLevel)
+                                      ? const Color(0xfff43e3e) // Red for very dirty clothes
+                                      : _flashcards[index].dirty > (12 - globals.cleanlinessLevel) && _flashcards[index].dirty <= 3 * (12 - globals.cleanlinessLevel)
+                                      ? const Color.fromRGBO(255, 153, 153, 0.7) // Light red for dirty clothes
+                                      : _flashcards[index].dirty > 0 && _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
+                                      ? const Color(0xfff9f1a4) // Yellow for moderately dirty clothes
+                                      : const Color(0xffa0fc81), // Green for clean clothes
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                stops: [0.0, 1.0], // Smooth uniform gradient transition
+                              ),
+                              color: _selectedIndices.contains(index) ? Colors.blue.shade100 : null, // Solid blue if selected
+                              borderRadius: BorderRadius.circular(12.0), // Circular corners
+                            ),
+                            padding: const EdgeInsets.all(2.0),
                             child: ListTile(
-                              // Image: Apply a grey filter if dirty == -1
                               leading: _flashcards[index].pic != null && _flashcards[index].pic.isNotEmpty
                                   ? ColorFiltered(
                                 colorFilter: _flashcards[index].dirty == -1
@@ -369,20 +380,55 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               )
                                   : Icon(Icons.image_not_supported),
 
-                              // Title and Subtitle Text: Set to grey if dirty == -1
+                              // Title with Font Size 16
                               title: Text(
                                 _flashcards[index].name,
                                 style: TextStyle(
+                                  fontSize: 16,  // Set font size to 16 for the title
                                   color: _flashcards[index].dirty == -1 ? Colors.grey : Colors.black, // Grey font when washed
                                 ),
                               ),
+
+                              // Subtitle with Font Size 12
                               subtitle: Text(
                                 _flashcards[index].dirty == -1
-                                    ? 'Last Worn: ${_calculateTimeDifference(_flashcards[index].lastWorn)}\nThe cloth is drying right now.'
-                                    : 'Last Worn: ${_calculateTimeDifference(_flashcards[index].lastWorn)}\nDirty: ${_flashcards[index].dirty}',
+                                    ? '${_calculateTimeDifference(_flashcards[index].lastWorn)}\nThe cloth is drying right now.'
+                                    : '${_calculateTimeDifference(_flashcards[index].lastWorn)}',
                                 style: TextStyle(
+                                  fontSize: 12,  // Set font size to 12 for the subtitle
                                   color: _flashcards[index].dirty == -1 ? Colors.grey : Colors.black, // Grey subtitle when washed
                                 ),
+                              ),
+
+                              // Trailing section
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min, // Makes sure the row doesn't take too much space
+                                children: [
+                                  Container(
+                                    width: 0.0,
+                                    height: 0.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: _flashcards[index].dirty == -1
+                                          ? Colors.grey.shade300 // Greyed out color when drying
+                                          : _flashcards[index].dirty > 3 * (12 - globals.cleanlinessLevel)
+                                          ? const Color(0xfff43e3e) // Red for very dirty
+                                          : _flashcards[index].dirty > (12 - globals.cleanlinessLevel) && _flashcards[index].dirty <= 3 * (12 - globals.cleanlinessLevel)
+                                          ? const Color.fromRGBO(255, 153, 153, 0.7) // Light red for dirty clothes
+                                          : _flashcards[index].dirty > 0 && _flashcards[index].dirty < (12 - globals.cleanlinessLevel)
+                                          ? const Color(0xffFFF5CD) // Yellow for moderately dirty
+                                          : const Color(0xffa0fc81), // Green for clean clothes
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8.0), // Add some spacing between the circle and the text
+                                  Text(
+                                    _flashcards[index].dirty > 0 ? "${_flashcards[index].dirty}" : "0", // Show "Dirty" only if dirty > 0
+                                    style: TextStyle(
+                                      fontSize: 14.783650,
+                                      color: _flashcards[index].dirty > 0 ? Colors.black : Colors.black, // Hide text if not dirty
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
